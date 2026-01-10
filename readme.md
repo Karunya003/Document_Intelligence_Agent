@@ -33,15 +33,20 @@ The goals of this assignment were interpreted as:
 ## System Architecture
 
 ```
-PDF Upload
+User
    ↓
-Text Extraction
+FastAPI Endpoint / Chat UI
    ↓
-Agent
+Agent Executor
+   ├─> [PDF Extractor Tool]  → Extracts raw text from uploaded PDF
+   └─> [Other Dynamic Tools] → Performs analysis, metrics extraction, web/API queries, recommendations
    ↓
-Tool Selection & Reasoning
+LLM (OpenAI) → Process and format results 
    ↓
-Structured JSON + Chat Responses
+Structured JSON Response
+   ↓
+FastAPI Endpoint / Chat UI
+
 ```
 
 ---
@@ -145,7 +150,8 @@ The following assumptions were made while completing this assignment:
 ```bash
 # 1. Create virtual environment
 python -m venv venv
-source venv/bin/activate
+Mac: source venv/bin/activate (or)
+Windows: venv\Scripts\activate
 
 # 2. Install dependencies
 pip install -r requirements.txt
