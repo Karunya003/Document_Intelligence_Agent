@@ -39,7 +39,7 @@ FastAPI Endpoint / Chat UI
    ↓
 Agent Executor
    ├─> [PDF Extractor Tool]  → Extracts raw text from uploaded PDF
-   └─> [Other Dynamic Tools] → Performs analysis, metrics extraction, web/API queries, recommendations
+   └─> [Other Dynamic Tools] → Performs analysis, metrics extraction
    ↓
 LLM (OpenAI) → Process and format results 
    ↓
