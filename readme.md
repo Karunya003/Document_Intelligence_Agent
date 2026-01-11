@@ -189,7 +189,7 @@ This architecture is intentionally aligned with **enterprise document intelligen
 
 ## Author
 
-**Karunya S**  
+**Karunya Srinivasan**  
 MSc Computer Science  
 AI / Data / ML Engineer Candidate
 
