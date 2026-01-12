@@ -5,6 +5,10 @@ This repository contains a **production-ready Document Intelligence Agent** buil
 
 The solution is designed with  **tool-based orchestration** and a **chat-based user interface** suitable for real-world enterprise use cases.
 
+## 🎥 Demo Video
+
+▶️ [Click to watch the demo](Demo.mp4)
+
 ---
 
 ## Assignment Objectives
