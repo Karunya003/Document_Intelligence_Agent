@@ -1,15 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, Form
-import os, shutil, json, logging
+import os, shutil, logging
 from dotenv import load_dotenv
-from pydantic import ValidationError
-import json, re
-
-from agent.agent import build_agent
-from langchain.output_parsers import PydanticOutputParser
-from pydantic import ValidationError
-from agent.schemas import DocumentInsight
+from agent.agent import extract_document_insights, conversation_agent
 from agent.tools import pdf_extractor
-from evaluation.evaluator import evaluate
 
 load_dotenv()
 
@@ -18,12 +11,8 @@ if not os.getenv("OPENAI_API_KEY"):
 
 app = FastAPI(title="Document Intelligence Agent")
 
-agent_executor = build_agent()
-
 UPLOAD_DIR = "data/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-parser = PydanticOutputParser(pydantic_object=DocumentInsight)
 
 # In-memory document store
 pdf_memory: dict[str, str] = {}
@@ -32,135 +21,60 @@ pdf_memory: dict[str, str] = {}
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def clean_json_output(text: str) -> str:
-    """Clean JSON output from markdown code blocks and other artifacts"""
-    if not text:
-        return ""
-    
-    # Remove markdown code blocks
-    text = re.sub(r"```(json)?\n?", "", text)
-    text = re.sub(r"\n?```", "", text)
-    
-    # Remove common prefixes that GPT might add
-    prefixes = [
-        "Here is the extracted information from the document formatted according to the specified JSON schema:",
-        "Here is the JSON output:",
-        "The JSON output is:",
-        "I will extract the required information from the provided document and format it according to the specified JSON schema.",
-        "Here's the JSON response:",
-        "JSON output:"
-    ]
-    
-    for prefix in prefixes:
-        if text.startswith(prefix):
-            text = text[len(prefix):].strip()
-    
-    # Find JSON content (look for { ... })
-    json_match = re.search(r'\{.*\}', text, re.DOTALL)
-    if json_match:
-        text = json_match.group(0)
-    
-    # Clean up whitespace
-    text = text.strip()
-    
-    return text
-
-
 @app.get("/")
 def root():
     return {"message": "Document Intelligence Agent API is running!"}
-
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
-
-@app.post("/chat")
-async def analyze_document(file: UploadFile = File(...)):
+@app.post("/extract")
+async def extract_document(file: UploadFile = File(...)):
+    """Direct extraction endpoint (no tools)"""
     file_path = os.path.join(UPLOAD_DIR, file.filename)
 
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-# Extract text safely
+    # Extract text from PDF
     text = pdf_extractor.invoke(file_path)
     text = text.replace("\n", " ").strip()
+    
+    # Store in memory for Q&A
     pdf_memory[file.filename] = text
+    
+    # Use direct LLM extraction (no tools)
+    insights = extract_document_insights(text)
+    
+    return {"result": insights}
 
-    # Prepare structured output parser
-    task = f"""
-    Here is the document to analyze:
-    \"\"\"{text}\"\"\"
-    Extract summary, key entities, risks, and metrics.
-    Return JSON STRICTLY following this schema:
-    {parser.get_format_instructions()}
-    """
-
-    result = agent_executor.invoke({"input": task})
-    response_json = json.loads(result["output"])
-    answer = response_json["answer"]  # Always works
-
-    try:
-        raw_output = clean_json_output(answer)
-
-         # First, parse as plain JSON
-        json_data = json.loads(raw_output)
-        
-        # Then create DocumentInsight from dict
-        structured = DocumentInsight(
-            summary=str(json_data.get("summary", "")),
-            entities=list(json_data.get("entities", [])),
-            risks=list(json_data.get("risks", [])),
-            metrics=dict(json_data.get("metrics", {}))
-        )
-
-    except (ValidationError, json.JSONDecodeError) as e:
-        return {
-        "error": "Failed to parse output",
-        "details": str(e),
-        "raw_json": raw_output if 'raw_output' in locals() else answer[:1000],
-        "json_parsed": json_data if 'json_data' in locals() else None
-    }
-
-    evaluation = evaluate(
-        output=structured.model_dump(),
-        meta={
-            "schema_valid": True,
-            "document_length": len(text),
-            "confidence": 0.9
-        }
-    )
-
-    logger.info("Evaluation:")
-    logger.info(json.dumps(evaluation, indent=2))
-
-    return {
-        "result": structured.model_dump(),
-        "evaluation": evaluation
-    }
-
-
-@app.post("/question")
+@app.post("/chat")
 async def question_document(
     file_name: str = Form(...),
     question: str = Form(...)
 ):
+    """Conversation endpoint (with tools)"""
     if file_name not in pdf_memory:
-        return {"error": "Document not found. Upload first."}
+        return {"error": "Document not found. Upload first via /extract endpoint."}
 
-    document_text = pdf_memory[file_name]
-
+    # Get the file path for tools
+    file_path = os.path.join(UPLOAD_DIR, file_name)
+    
+    # Create context for conversation
     task = f"""
-    Answer the question using ONLY the document below.
-
-    Question:
-    {question}
-
-    Document:
-    {document_text}
+    File: {file_name}
+    File path: {file_path}
+    
+    User question: {question}
+    
+    You have access to tools to help answer this question.
+    Use the appropriate tools if needed.
     """
-
-    result = agent_executor.invoke({"input": task})
-
-    return {"answer": result["output"]}
+    
+    try:
+        result = conversation_agent.invoke({"input": task})
+        return {"answer": result["output"]}
+    except Exception as e:
+        logger.error(f"Conversation agent error: {e}")
+        return {"error": f"Agent error: {str(e)}"}

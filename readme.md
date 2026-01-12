@@ -1,7 +1,7 @@
 # 📄 Document Intelligence Agent
 
 ## Overview
-This repository contains a **production-ready Document Intelligence Agent** built as part of a technical assignment. The system ingests unstructured PDF documents and immediately produces a **structured JSON output** while also supporting **conversational Q&A** over the uploaded document.
+This repository contains a **production-ready Document Intelligence Agent** built as part of a 24 hr technical assignment. The system ingests unstructured PDF documents and immediately produces a **structured insight** while also supporting **conversational Q&A** over the uploaded document.
 
 The solution is designed with  **tool-based orchestration** and a **chat-based user interface** suitable for real-world enterprise use cases.
 
@@ -22,10 +22,9 @@ The goals of this assignment were interpreted as:
 ## Key Features
 
 - 📥 **PDF Upload & Parsing** (PyPDF)
-- 🧠 **LLM-powered Agent**
+- 🧠 **LLM-powered Agent**  (ReAct Agent)
 - 🧰 **Tool-based reasoning** (summary, entities, risks, metrics, Q&A)
 - 💬 **Conversational Chat Interface** (Streamlit)
-- 🧪 **Evaluation Hooks** (schema validity, completeness, confidence)
 - ⚙️ **FastAPI backend** (optional API mode)
 
 ---
@@ -33,31 +32,31 @@ The goals of this assignment were interpreted as:
 ## System Architecture
 
 ```
-PDF Upload
+User
    ↓
-Text Extraction
+FastAPI Endpoint / Chat UI
    ↓
-Agent
+Agent Executor
+   ├─> [PDF Extractor Tool]  → Extracts raw text from uploaded PDF
+   └─> [Other Dynamic Tools] → Performs analysis, metrics extraction
    ↓
-Tool Selection & Reasoning
+LLM (OpenAI) → Process and format results 
    ↓
-Structured JSON + Chat Responses
+Structured Response
+   ↓
+FastAPI Endpoint / Chat UI
 ```
 
 ---
 
 ## Output Schema
 
-On document upload, the system generates a structured JSON output:
+On document upload, the system generates a structured output using chat UI:
 
-```json
-{
-  "summary": "...",
+ "summary": "...",
   "key_entities": [],
   "risks": [],
   "metrics": []
-}
-```
 
 This output is generated **immediately after ingestion**, before any follow-up questions are asked.
 
@@ -73,19 +72,6 @@ After ingestion, the agent behaves as a **stateful conversational assistant**:
 
 ---
 
-## Evaluation Logic
-
-The project includes an evaluation layer (non-blocking) that can assess:
-
-- Schema completeness
-- Missing or empty fields
-- Retrieval coverage
-- Confidence score estimation
-
-This evaluation logic is designed to be extensible and production-safe (no auto-retries or blocking failures).
-
----
-
 ## Project Structure
 
 ```
@@ -98,11 +84,7 @@ Document_Intelligence_Agent/
 │   ├── schemas.py      # Output schemas
 │
 ├── api/
-│   └── main.py         # FastAPI backend (optional)
-│
-├── evaluation/
-│   └── evaluator.py   # Output evaluation logic
-│   ├── metrics.py      # Evaluation metrics
+│   └── main.py         # FastAPI backend
 │
 ├── data/
 │   ├── uploads/        # Ignored (runtime only)
@@ -132,10 +114,7 @@ The following assumptions were made while completing this assignment:
 4. **Latency > cost optimization**
    - Design favors clarity, accuracy, and traceability over minimal token usage.
 
-5. **Evaluation is advisory**
-   - Evaluation does not block outputs; it is informational.
-
-6. **Security scope**
+5. **Security scope**
    - Authentication and authorization are considered out-of-scope for this assignment.
 
 ---
@@ -145,7 +124,8 @@ The following assumptions were made while completing this assignment:
 ```bash
 # 1. Create virtual environment
 python -m venv venv
-source venv/bin/activate
+Mac: source venv/bin/activate (or)
+Windows: venv\Scripts\activate
 
 # 2. Install dependencies
 pip install -r requirements.txt
@@ -183,7 +163,7 @@ This architecture is intentionally aligned with **enterprise document intelligen
 
 ## Author
 
-**Karunya S**  
+**Karunya Srinivasan**  
 MSc Computer Science  
 AI / Data / ML Engineer Candidate
 

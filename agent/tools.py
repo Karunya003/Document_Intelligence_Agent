@@ -11,7 +11,7 @@ if not os.getenv("OPENAI_API_KEY"):
     raise RuntimeError("OPENAI_API_KEY not set")
 
 # Initialize LLM
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, timeout=120)
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0, timeout=300)
 
 # Memory for multi-turn conversation
 PDF_MEMORY = {}
@@ -44,7 +44,7 @@ def pdf_extractor(file_path: str) -> str:
 
     except Exception as e:
         return f"Error extracting PDF: {str(e)}"
-
+    
 # Summarization tool
 @tool
 def summarize(file_path: str) -> str:
@@ -158,10 +158,6 @@ core_tools = [
 
 # Additional analysis tools
 dynamic_tools = [
-    summarize,
-    extract_entities,
-    extract_risks,
-    extract_metrics,
     answer_question,
     extract_action_items,
     sentiment_analysis,
