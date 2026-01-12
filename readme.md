@@ -42,9 +42,16 @@ Agent Executor
    ↓
 LLM (OpenAI) → Process and format results 
    ↓
+<<<<<<< HEAD
 Structured Response
    ↓
 FastAPI Endpoint / Chat UI
+=======
+Structured JSON Response
+   ↓
+FastAPI Endpoint / Chat UI
+
+>>>>>>> c6616a2c1d4df7f3036c67a262d70ffc55a28102
 ```
 
 ---
