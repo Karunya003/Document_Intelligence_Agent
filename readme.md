@@ -1,13 +1,15 @@
-# 📄 Document Intelligence Agent
+# 📄 Financial Document Intelligence Agent
 
 ## Overview
-This repository contains a **production-ready Document Intelligence Agent** built as part of a 24 hr technical assignment. The system ingests unstructured PDF documents and immediately produces a **structured insight** while also supporting **conversational Q&A** over the uploaded document.
+This repository contains a **production-ready Document Intelligence Agent** for Finance built as part of a 24 hr technical assignment. The system ingests unstructured PDF documents and produces a **structured insight** upon a click while also supporting **conversational Q&A** over the uploaded document.
 
 The solution is designed with  **tool-based orchestration** and a **chat-based user interface** suitable for real-world enterprise use cases.
 
 ## 🎥 Demo Video
+<div class="cell markdown" id="pasjVk5WRXMM">
 
-▶️ https://github.com/user-attachments/assets/bfb145c8-13cc-43b1-9cda-87e552e9b9a6
+[<img src = "https://github.com/user-attachments/assets/bfb145c8-13cc-43b1-9cda-87e552e9b9a6" width="800" height="600"
+/>]
 
 ---
 
@@ -15,8 +17,8 @@ The solution is designed with  **tool-based orchestration** and a **chat-based u
 
 The goals of this assignment were interpreted as:
 
-- Ingest long, unstructured documents (PDFs)
-- Extract structured insights automatically on upload
+- Ingest unstructured documents (PDFs)
+- Extract structured insights
 - Support follow-up natural language questions
 - Ensure modular, extensible, production-quality design
 - Clearly separate ingestion, reasoning, retrieval, and UI layers
@@ -36,22 +38,20 @@ The goals of this assignment were interpreted as:
 ## System Architecture
 
 ```
-User
+  User
    ↓
 FastAPI Endpoint / Chat UI
+   ↓
+  LLM → Extract insights
    ↓
 Agent Executor
    ├─> [PDF Extractor Tool]  → Extracts raw text from uploaded PDF
-   └─> [Other Dynamic Tools] → Performs analysis, metrics extraction
+   └─> [Other Dynamic Tools] → summary, entities, metrics, sentiment analysis
+   └─> [Q&A] → Conversational manager
    ↓
 LLM (OpenAI) → Process and format results 
    ↓
-<<<<<<< HEAD
 Structured Response
-   ↓
-FastAPI Endpoint / Chat UI
-=======
-Structured JSON Response
    ↓
 FastAPI Endpoint / Chat UI
 
@@ -67,8 +67,6 @@ On document upload, the system generates a structured output using chat UI:
   "key_entities": [],
   "risks": [],
   "metrics": []
-
-This output is generated **immediately after ingestion**, before any follow-up questions are asked.
 
 ---
 
@@ -112,7 +110,7 @@ Document_Intelligence_Agent/
 
 The following assumptions were made while completing this assignment:
 
-1. **Single-document context**
+1. **Short and Single-document context**
    - Each session focuses on one uploaded PDF at a time.
 
 2. **Read-only documents**
@@ -124,7 +122,10 @@ The following assumptions were made while completing this assignment:
 4. **Latency > cost optimization**
    - Design favors clarity, accuracy, and traceability over minimal token usage.
 
-5. **Security scope**
+5. **Agent workflow & Tool-orchestration > Tool capability**
+   - Modular design priortized architecture clarity, scope control and future extensibility than decision-making potential.
+
+6. **Security scope**
    - Authentication and authorization are considered out-of-scope for this assignment.
 
 ---
@@ -159,13 +160,10 @@ streamlit run app.py
 - **Tool separation** mirrors real production systems
 - **Conversational UI** reflects real user workflows
 
-This architecture is intentionally aligned with **enterprise document intelligence systems** rather than a simple demo pipeline.
-
 ---
 
 ## Notes for Reviewers
 
-- The system is designed to scale to additional tools (compliance checks, sentiment analysis, cross-doc comparison).
 - The FastAPI backend can be used instead of Streamlit for service-based deployment.
 - All secrets and runtime data are excluded from version control.
 
