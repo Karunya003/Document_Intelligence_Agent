@@ -9,7 +9,7 @@ The solution is designed with  **tool-based orchestration** and a **chat-based u
 <div class="cell markdown" id="pasjVk5WRXMM">
 
 [<img src = "https://github.com/user-attachments/assets/bfb145c8-13cc-43b1-9cda-87e552e9b9a6" width="800" height="600"
-/>]
+/>](https://github.com/user-attachments/assets/bfb145c8-13cc-43b1-9cda-87e552e9b9a6)
 
 ---
 
