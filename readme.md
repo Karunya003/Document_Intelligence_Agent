@@ -122,7 +122,7 @@ The following assumptions were made while completing this assignment:
    - Design favors clarity, accuracy, and traceability over minimal token usage.
 
 5. **Agent workflow & Tool-orchestration > Tool capability**
-   - Modular design priortized architecture clarity, scope control and future extensibility than decision-making potential.
+   - Modular design priortized architecture clarity, scope control and future extensibility than features or tools potential.
 
 6. **Security scope**
    - Authentication and authorization are considered out-of-scope for this assignment.
