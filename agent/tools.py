@@ -124,29 +124,6 @@ def sentiment_analysis(text: str) -> str:
     prompt = f"Analyze the sentiment of the following text and label it as Positive, Negative, or Neutral:\n{text}"
     return llm.predict(prompt)
 
-# Trend analysis tool without llm usage
-@tool
-def analyze_trend(values: list[float]) -> str:
-    """
-    Analyze numeric data and predict trend: upward, downward, stable.
-    """
-    if not values:
-        return "No data provided."
-    if len(values) < 2:
-        return "Not enough data to determine trend."
-    
-    diffs = [values[i+1] - values[i] for i in range(len(values)-1)]
-    avg_diff = sum(diffs)/len(diffs)
-    
-    if avg_diff > 0:
-        return "Overall trend is upward."
-    elif avg_diff < 0:
-        return "Overall trend is downward."
-    else:
-        return "Trend is stable."
-
-
-
 # List of core tools
 core_tools = [
     pdf_extractor,
@@ -161,5 +138,4 @@ dynamic_tools = [
     answer_question,
     extract_action_items,
     sentiment_analysis,
-    analyze_trend
 ]
